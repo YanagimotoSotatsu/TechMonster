@@ -9,6 +9,7 @@
 import UIKit
 
 class BattleViewController: UIViewController {
+    var enemyAttackTimer: Timer!
     
     var enemy: Enemy!
     var player: Player!
@@ -50,6 +51,8 @@ class BattleViewController: UIViewController {
         enemyHPBar.progress = enemy.currentHP / enemy.maxHP
         
         attackButton.isHidden = false
+        
+        enemyAttackTimer = Timer.scheduledTimer(timeInterval: enemy.attackInterval, target: self, selector: #selector(self.enemyAttack), userInfo: nil, repeats: true)
 
         }
 
@@ -62,6 +65,9 @@ class BattleViewController: UIViewController {
         TechDraUtil.animateDamage(enemyImageView)
         TechDraUtil.playSE(fileName: "SE_attack")
         
+        enemy.currentHP = enemy.currentHP - player.attackPower
+        enemyHPBar.setProgress(enemy.currentHP / enemy.maxHP, animated: true)
+        
         if enemy.currentHP < 0{
             TechDraUtil.animateVanish(enemyImageView)
             finishBattle(winPlayer: true)
@@ -69,10 +75,26 @@ class BattleViewController: UIViewController {
     
     }
     
+    func enemyAttack(){
+        TechDraUtil.animateDamage(playerImageView)
+        TechDraUtil.playSE(fileName: "SE_attack")
+        
+        player.currentHP = player.currentHP - enemy.attackPower
+        playerHPBar.setProgress(player.currentHP / player.maxHP, animated: true)
+        
+        if player.currentHP < 0{
+            TechDraUtil.animateVanish(playerImageView)
+            finishBattle(winPlayer: false)
+        }
+    }
+
+    
     func finishBattle(winPlayer: Bool){
         TechDraUtil.stopBGM()
         
         attackButton.isHidden = true
+        
+        enemyAttackTimer.invalidate()
         let finishedMessage: String
         if winPlayer == true {
             TechDraUtil.playSE(fileName: "SE_fanfare")
@@ -90,7 +112,8 @@ class BattleViewController: UIViewController {
         
         
     }
-
+    
+    
     /*
     // MARK: - Navigation
 

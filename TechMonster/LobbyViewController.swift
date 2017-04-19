@@ -13,6 +13,7 @@ class LobbyViewController: UIViewController {
     var maxStamina: Float = 100
     var stamina: Float = 100
     var player: Player = Player()
+    var staminaTimer: Timer!
     
     @IBOutlet var nameLabel: UILabel!
     @IBOutlet var staminaBar: UIProgressView!
@@ -28,6 +29,7 @@ class LobbyViewController: UIViewController {
         
         stamina = maxStamina
         staminaBar.progress = stamina / maxStamina
+        staminaTimer = Timer.scheduledTimer(timeInterval: 1.0, target: self, selector: #selector(self.cureStamina), userInfo: nil, repeats: true)
 
     
     }
@@ -41,6 +43,15 @@ class LobbyViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         TechDraUtil.stopBGM()
+        
+        print(stamina)
+    }
+    
+    func cureStamina(){
+        if stamina < maxStamina{
+            stamina = min(stamina + 1, maxStamina)
+            staminaBar.progress = stamina / maxStamina
+        }
     }
 
 
@@ -61,6 +72,16 @@ class LobbyViewController: UIViewController {
     */
     
     @IBAction func startBattle(){
+        if stamina >= 20{
+            stamina = stamina - 20
+            staminaBar.progress = stamina / maxStamina
+            performSegue(withIdentifier: "startBattle", sender: nil)
+        }else{
+            let alert = UIAlertController(title: "スタミナ不足", message: "スタミナが２０以上必要です", preferredStyle:  .alert)
+            let action = UIAlertAction(title: "OK", style: .default, handler: nil)
+            alert.addAction(action)
+            self.present(alert, animated: true, completion: nil)
+        }
         performSegue(withIdentifier: "startBattle", sender: nil)
     }
 
